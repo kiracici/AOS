@@ -1,0 +1,40 @@
+tosca_definitions_version: huaweicloud_tosca_version_1_0
+node_templates:
+  myvpc:
+    type: HuaweiCloud.VPC.VPC
+    properties:
+      name: my-vpc
+      cidr: '192.168.0.0/16'
+  mysubnet:
+    type: HuaweiCloud.VPC.Subnet
+    properties:
+      name: my-subnet
+      cidr: '192.168.1.0/24'
+      gateway: 192.168.1.1
+      vpcId:
+        get_reference: myvpc
+      dhcpEnable: true
+    requirements:
+      - vpcId:
+          node: myvpc
+  myecs:      
+    type: HuaweiCloud.ECS.CloudServer    
+    properties:       
+      name: my-ecs      
+      instances: 1      
+      imageId: a3934478-bfeb-4a02-b257-9089779f0380      
+      flavor: c1.medium      
+      vpcId: 
+        get_reference: myvpc
+      availabilityZone: cn-south-1a      
+      nics:        
+        - subnetId: 
+            get_reference: mysubnet      
+      rootVolume:        
+        volumeType: SATA        
+        size: 40    
+    requirements:      
+      - vpcId:         
+          node: myvpc      
+      - nics.subnetId:          
+          node: mysubnet
